@@ -23,7 +23,7 @@ from collections import deque
 import logging
 
 from . import searchspace
-
+import os
 
 def breadth_first_search(planning_task):
     """
@@ -34,6 +34,10 @@ def breadth_first_search(planning_task):
     @return: The solution as a list of operators or None if the task is
     unsolvable.
     """
+    #FILE_NAME = os.path.abspath("C:\\Users\\Yifat\\Desktop\\THESIS\\bli.txt")
+    #with open (FILE_NAME,"w")as file:
+    #    file.write("from" + str(planning_task.initial_state))
+    
     # counts the number of loops (only for printing)
     iteration = 0
     # fifo-queue storing the nodes which are next to explore
@@ -43,6 +47,8 @@ def breadth_first_search(planning_task):
     closed = {frozenset(planning_task.initial_state)}
     while queue:
         iteration += 1
+        if iteration % 10000 == 0:
+            print("iteration: ", iteration)   
         logging.debug(
             "breadth_first_search: Iteration %d, #unexplored=%d"
             % (iteration, len(queue))
@@ -57,11 +63,16 @@ def breadth_first_search(planning_task):
         for operator, successor_state in planning_task.get_successor_states(node.state):
             # duplicate detection
             if frozenset(successor_state) not in closed:
+                #with open (FILE_NAME,"a")as file:
+                #    file.write("****" + str(successor_state) + "\n")
                 queue.append(
                     searchspace.make_child_node(node, operator, successor_state)
                 )
                 # remember the successor state
                 closed.add(frozenset(successor_state))
+    #with open (FILE_NAME,"a")as file:
+    #    file.write("---------------------------")
     logging.info("No operators left. Task unsolvable.")
     logging.info("%d Nodes expanded" % iteration)
+    print("iteration num:", iteration)
     return None
