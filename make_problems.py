@@ -17,7 +17,7 @@ def get_plan_to_goal(problem, temp_path):
     for i in range(len(problem_file_content)):
         if "HYPOTHESIS" in  problem_file_content[i]:
             problem_file_content[i] = problem_file_content[i].replace("<HYPOTHESIS>",real_hype)
-    problem_file = os.path.join(temp_path, "temp_file.pddl")
+    problem_file = os.path.join(temp_path, real_hype + "temp_file.pddl")
     
     with open(problem_file , 'w') as f:
         f.writelines(problem_file_content)
@@ -29,7 +29,7 @@ def get_plan_to_goal(problem, temp_path):
 def choose_combined_goal(atom_goals):
     combined_goals = []
     
-    prob = 0.75
+    prob = 0.5
     new_goal = []
    
     # Put every atom-goal in the combined-goal in a prob of 1\num of goals.       
@@ -71,18 +71,21 @@ def choose_goals(goals_list, num_of_goals):
     return chosen_goals
 
 def create_problems_java_format(domain_new_problem_path):
-    index = 0
+    index = 50
     for problem in problems[domain]:
+        print("problem=", problem)
+        print("index= ", index)
         # First check if there is a plan from the initial state to the goal.
         # (Mabey the goal that was randomly built is unreachable).
-        pln = get_plan_to_goal(problem, "C:\\Users\\Yifat\\Desktop\\THESIS")        
+        pln = get_plan_to_goal(problem, "/home/yifat/temp")        
         if pln is None:
             # Dont create a zip file for this problem.
-            continue
+           print("pln = None!")
+           continue
 
 
         problem_path = os.path.join(domain_new_problem_path, "problem-" + str(index))
-        os.makedirs(problem_path)
+        os.makedirs(problem_path, exist_ok=True)
 
         # Copy the domain file
         shutil.copy(domain_files[domain], os.path.join(problem_path, DOMAIN_FILE))
@@ -113,18 +116,18 @@ def create_problems_java_format(domain_new_problem_path):
             os.path.exists(os.path.join(problem_path, REAL_HYP_FILE)) and
             os.path.exists(os.path.join(problem_path, OBS_FILE))):
 
-            command = 'C:\\Program Files\\WinRAR\\WinRAR.exe'
+            #command = 'C:\\Program Files\\WinRAR\\WinRAR.exe'
             
             file_name_without_path = re.match("[^//]*$","problem_path")
-            full_command = ["cmd", "/c", command, "a", "-ep1" ,problem_path + ".tar.bz2" ,problem_path + "\\*" ]
+            full_command = ["tar", "-cjf" ,problem_path + ".tar.bz2" , "-C" , domain_new_problem_path,  "problem-" + str(index)]
             result = subprocess.run(full_command)
             print(str(full_command))
 
         if result.returncode == 0:
-            print("Success:")
+            print("Success: problem created!")
         else:
             print("Fail:")
-            print(result.stderr)             
+            print(result.stderr)
         index += 1
 
 def create_problems_for_initial_state(domain, initial_state, num_of_problems):
@@ -140,10 +143,12 @@ def unzip_file(problem_tar_file):
     if not match:
         return
     file_without_extention = match.group(0)
-    file_without_extention += "\\"
+    #file_without_extention += "\\"
 
-    command = 'C:\\Program Files\\WinRAR\\WinRAR.exe'
-    full_command = ["cmd", "/c", command, "x", "-o+", "-y", problem_tar_file, file_without_extention]
+    os.makedirs(file_without_extention ,exist_ok=True)
+    #command = 'C:\\Program Files\\WinRAR\\WinRAR.exe'
+    full_command = ["tar", "-xjf" , problem_tar_file, "-C", file_without_extention]
+    
     result = subprocess.run(full_command)
     #result = subprocess.run(["cmd", "/c", command, arg, problem_tar_file, file_without_extention])
     #print(str(full_command))
@@ -198,6 +203,9 @@ def handle_domin(domain, domain_path, new_problems_path):
     init_files[domain] = {}
     problems[domain] = []
 
+    print("domain", domain)
+    print("domain path:", domain_path)
+    print("new prolems", new_problems_path)
 
     files_in_directory = [f for f in os.listdir(domain_path)]
     tar_file_reg = ".*tar.bz2"
@@ -216,15 +224,20 @@ def handle_domin(domain, domain_path, new_problems_path):
     # Create the problems' files.
     # Make the domians directory' of it does not exsit.
     domain_new_problem_path = os.path.join(new_problems_path, domain)
-    os.makedirs(domain_new_problem_path,exist_ok=True)
+    os.makedirs(domain_new_problem_path, exist_ok=True)
     create_problems_java_format(domain_new_problem_path)
     
 
 
-domains = ["blocks-world"]# "campus" , "campus-noisy", "depots", "driverlog", "dwr", "easy-ipc-grid", 
- #          "easy-ipc-grid-noisy", "ferry"]#, "intrusion-detection", "intrusion-detection-noisy", "kitchen", 
+#domains = ["blocks-world"]# "campus" , "campus-noisy", "depots", "driverlog", "dwr", "easy-ipc-grid", 
+#          "easy-ipc-grid-noisy", "ferry"]#, "intrusion-detection", "intrusion-detection-noisy", "kitchen", 
 #           "kitchen-noisy", "logistics", "miconic", "rovers", "satellite", "sokoban", "zeno-travel"]
+#domains = ["depots"]
+#domains = ["logistics"]
+#domains = ["driverlog"]
+#domains = ["dwr"]
 #domains = ["blocks"]
+domains = ["ferry"]
 
 INIT_STATE_FILE_NAME = "template.pddl"
 HYPES_FILE_NAME = "hyps.dat"
@@ -236,15 +249,20 @@ OBS_FILE = "obs.dat"
 init_states = {}
 goals = {}
 problems = {}
-domain_files = {"blocks-world":  "C:\\Users\\Yifat\\Desktop\\THESIS\\data\\3-atom-goals-2-towers\\problem_files\\domain.pddl",
-                "blocks":  "C:\\Users\\Yifat\\Desktop\\THESIS\\data\\3-atom-goals-2-towers\\problem_files\\domain.pddl"}
+domain_files = {"blocks-world":  "/home/yifat/domain-files/blocks-domain.pddl",
+        "blocks":  "/home/yifat/domain-files/blocks-domain.pddl",
+        "depots":  "/home/yifat/domain-files/depots-domain.pddl",
+        "logictics":  "/home/yifat/domain-files/logi-domain.pddl",
+        "driverlog":  "/home/yifat/domain-files/driverlog-domain.pddl",
+        "dwr":  "/home/yifat/domain-files/dwr-domain.pddl",
+        "ferry":  "/home/yifat/domain-files/ferry-domain.pddl"}
 init_files = {}
 
 if __name__ == "__main__":
     random.seed(14)
-    path = os.path.abspath("C:\\Users\\Yifat\\Documents\\GitHub\\OnlineGoalRecognition-DiscreteDomains\\dataset")
+    path = "/home/yifat/OnlineGoalRecognition-DiscreteDomains/dataset"
     #path = os.path.abspath("C:\\Users\\Yifat\\Documents\\GitHub\\OnlineGoalRecognition-DiscreteDomains\\yifat-experiments\\try")
-    new_problems_path = os.path.abspath("C:\\Users\\Yifat\\Documents\\GitHub\\OnlineGoalRecognition-DiscreteDomains\\yifat-experiments\\script-creared")
+    new_problems_path = "/home/yifat/OnlineGoalRecognition-DiscreteDomains/yifat-experiments/script-creared"
 
     for domain in domains:
         domain_path  = os.path.join(path, domain)
