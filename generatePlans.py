@@ -77,7 +77,7 @@ def landmarksForProblem(domainFile, problemFile):
                         extracted_landmarks_set.append(op)
     return extracted_landmarks_set
 
-def generatePlan(initialState, orderedLandmarks):
+def generatePlan(initialState, orderedLandmarks, template = None, costum_domaindir= None):
     def pathToGoal(acc, goal):
         task, ops = acc
         task.goals = goal
@@ -90,7 +90,7 @@ def generatePlan(initialState, orderedLandmarks):
             ops.append(op)
         return acc
 
-    acc = (createTaskFor(orderedLandmarks), [])
+    acc = (createTaskFor(orderedLandmarks, template, costum_domaindir), [])
     return functools.reduce(pathToGoal, orderedLandmarks, acc)
 
 def getRealTask():
@@ -106,7 +106,7 @@ def getRealTask():
     problem = parser.parse_problem(dom)
     return _ground(problem)
 
-def createTaskFor(goals):
+def createTaskFor(goals, costum_template = None, costum_domaindir= None):
     parsedGoal = "(and"
     for goal in goals:
         for pred in goal:
@@ -115,12 +115,20 @@ def createTaskFor(goals):
     parsedGoal += ")"
 
     problemFile = os.path.join(TEMP_DIR, f"task-temp.pddl")
-    task = template.replace("<HYPOTHESIS>", parsedGoal)
+    
+    if costum_template is not None:
+        task = costum_template.replace("<HYPOTHESIS>", parsedGoal)    
+    else:
+        task = template.replace("<HYPOTHESIS>", parsedGoal)
 
     with open(problemFile, "w") as create:
                 create.write(task)
 
-    parser = Parser(os.path.abspath(domaindir), problemFile)
+    if costum_domaindir is not None:
+        parser = Parser(os.path.abspath(costum_domaindir), problemFile)    
+    else:
+        parser = Parser(os.path.abspath(domaindir), problemFile)
+    
     dom = parser.parse_domain()
     problem = parser.parse_problem(dom)
     return _ground(problem)
