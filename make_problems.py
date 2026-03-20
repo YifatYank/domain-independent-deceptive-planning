@@ -22,7 +22,7 @@ def get_plan_to_goal(problem, temp_path):
     with open(problem_file , 'w') as f:
         f.writelines(problem_file_content)
 
-    plan_ops = search_plan(domain_files[domain], problem_file, SEARCHES["bfs"], None)
+    plan_ops = search_plan(domain_files[domain], problem_file, SEARCHES["ids"], None)
 
     return plan_ops
 
@@ -127,6 +127,8 @@ def create_problems_java_format(domain_new_problem_path):
             print(result.stderr)             
         index += 1
 
+
+
 def create_problems_for_initial_state(domain, initial_state, num_of_problems):
     for i in range(num_of_problems):
         problem_dict = {}
@@ -221,10 +223,10 @@ def handle_domin(domain, domain_path, new_problems_path):
     
 
 
-domains = ["blocks-world"]# "campus" , "campus-noisy", "depots", "driverlog", "dwr", "easy-ipc-grid", 
+#domains = ["logistics"]# "campus" , "campus-noisy", "depots", "driverlog", "dwr", "easy-ipc-grid", 
  #          "easy-ipc-grid-noisy", "ferry"]#, "intrusion-detection", "intrusion-detection-noisy", "kitchen", 
 #           "kitchen-noisy", "logistics", "miconic", "rovers", "satellite", "sokoban", "zeno-travel"]
-#domains = ["blocks"]
+domains = ["blocks"]
 
 INIT_STATE_FILE_NAME = "template.pddl"
 HYPES_FILE_NAME = "hyps.dat"
@@ -237,14 +239,15 @@ init_states = {}
 goals = {}
 problems = {}
 domain_files = {"blocks-world":  "C:\\Users\\Yifat\\Desktop\\THESIS\\data\\3-atom-goals-2-towers\\problem_files\\domain.pddl",
-                "blocks":  "C:\\Users\\Yifat\\Desktop\\THESIS\\data\\3-atom-goals-2-towers\\problem_files\\domain.pddl"}
+                "blocks":  "C:\\Users\\Yifat\\Desktop\\THESIS\\data\\3-atom-goals-2-towers\\problem_files\\domain.pddl",
+                "logistics":  "C:\\Users\\Yifat\\Documents\\GitHub\\domain-independent-deceptive-planning\\experiments-old\\logistics\\logistics-p02\\domain.pddl"}
 init_files = {}
 
 if __name__ == "__main__":
     random.seed(14)
     path = os.path.abspath("C:\\Users\\Yifat\\Documents\\GitHub\\OnlineGoalRecognition-DiscreteDomains\\dataset")
     #path = os.path.abspath("C:\\Users\\Yifat\\Documents\\GitHub\\OnlineGoalRecognition-DiscreteDomains\\yifat-experiments\\try")
-    new_problems_path = os.path.abspath("C:\\Users\\Yifat\\Documents\\GitHub\\OnlineGoalRecognition-DiscreteDomains\\yifat-experiments\\script-creared")
+    new_problems_path = os.path.abspath("C:\\Users\\Yifat\\Documents\\GitHub\\OnlineGoalRecognition-DiscreteDomains\\yifat-experiments\\try")
 
     for domain in domains:
         domain_path  = os.path.join(path, domain)
