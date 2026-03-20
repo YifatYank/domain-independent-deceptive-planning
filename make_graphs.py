@@ -39,7 +39,7 @@ if __name__ == "__main__":
         
     plt.legend()
     plt.rc('font', size=12)
-    #plt.title("Real Goal:" + real_goal, fontdict = {'size':20})
+    plt.title("Real Goal:" + real_goal, fontdict = {'size':20})
     plt.xticks(x,labels=observations, fontdict = {'size':12})
     plt.tight_layout()
     plt.show()
