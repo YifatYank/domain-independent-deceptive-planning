@@ -50,6 +50,7 @@ class IterativeDeepeningSearchAlgorithm:
         self.maxreacheddepth = 0
         # number of explored nodes during search
         self.explorednodes = 0
+        self.num_of_paths = 0
 
     def search(self, task, maxdepth=1000000):
         """
@@ -72,6 +73,7 @@ class IterativeDeepeningSearchAlgorithm:
         depth = 1
         # run until at goal or fail to explore to the given depth
         while depth < maxdepth:
+            print("depth = ", depth)
             self.maxreacheddepth = 0
             self.explorednodes = 0
             plan = self.deepening_search_step(task, task.initial_state, depth, 0, path)
@@ -88,6 +90,7 @@ class IterativeDeepeningSearchAlgorithm:
                 return None
             # try to find a plan ones deeper
             depth += 1
+            self.num_of_paths = 0
         logging.debug("Emergency brake. Loop? Increase maxdepth.")
         self.print_search_results(depth, -1)
         return None
@@ -113,29 +116,33 @@ class IterativeDeepeningSearchAlgorithm:
         unsolvable.
         """
         if step < depth:
+            if step + 1 == depth:
+                self.num_of_paths += 1
+                if self.num_of_paths % 100000 == 1:
+                    str_print = "     step = " + str(step) + " num_of_paths = " + str(self.num_of_paths)
+                    print(str_print)
             nextstep = step + 1
             # remember the actual state
-            path.add(state)
+            path.add(str(state))
             for operator, successor_state in task.get_successor_states(state):
                 self.explorednodes += 1
                 # already on path? Yes then it is an loop, so ignore the
                 # successor and return to the caller without a plan
-                if successor_state not in path:
+                if str(successor_state) not in path:
                     if task.goal_reached(successor_state):
                         logging.info("Goal reached. Start extraction of " "solution.")
                         self.maxreacheddepth = nextstep
                         return [operator]
                     else:
                         plan = self.deepening_search_step(
-                            task, successor_state, depth, nextstep, path
-                        )
+                            task, successor_state, depth, nextstep, path)
                         if plan is not None:
                             # extracting the plan and terminating
                             plan.append(operator)
                             return plan
             # found no plan on the explored path and children
             # remove the actual state
-            path.remove(state)
+            path.remove(str(state))
             if self.maxreacheddepth < step:
                 self.maxreacheddepth = step
         else:

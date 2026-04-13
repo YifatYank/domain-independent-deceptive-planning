@@ -106,7 +106,7 @@ def ground(problem):
         logging.debug("Initial state without statics:\n%s" % init)
 
     # perform relevance analysis
-    operators = _relevance_analysis(operators, goals)
+    #operators = _relevance_analysis(operators, goals)
 
     name = problem.name
     return Task(name, facts, init, goals, operators)
