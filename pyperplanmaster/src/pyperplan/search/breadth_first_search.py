@@ -48,7 +48,9 @@ def breadth_first_search(planning_task):
     while queue:
         iteration += 1
         if iteration % 10000 == 0:
-            print("iteration: ", iteration)   
+            with open("bfs.log", "a") as file:
+                str_print = "breadth_first_search: Iteration" + str(iteration) + " #unexplored=%d" + str(len(queue)) + "\n"
+                file.writelines(str_print)
         logging.debug(
             "breadth_first_search: Iteration %d, #unexplored=%d"
             % (iteration, len(queue))
